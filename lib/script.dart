@@ -7,25 +7,11 @@ String version = '';
 // prootDistro 路径
 String prootDistroPath = '${RuntimeEnvir.usrPath}/var/lib/proot-distro';
 // ubuntu 路径
-String ubuntuPath = '$prootDistroPath/installed-rootfs/ubuntu';
+String ubuntuPath = '$prootDistroPath/installed-rootfs/archlinux';
 String lockFile = '${RuntimeEnvir.dataPath}/cache/init_lock';
 // 清华源
 String source = '''
-# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble main restricted universe multiverse
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-updates main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-updates main restricted universe multiverse
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-backports main restricted universe multiverse
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-backports main restricted universe multiverse
-
-# 以下安全更新软件源包含了官方源与镜像站配置，如有需要可自行修改注释切换
-deb http://ports.ubuntu.com/ubuntu-ports/ noble-security main restricted universe multiverse
-# deb-src http://ports.ubuntu.com/ubuntu-ports/ noble-security main restricted universe multiverse
-
-# 预发布软件源，不建议启用
-# deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-proposed main restricted universe multiverse
-# # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-proposed main restricted universe multiverse
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxarm/\$arch/\$repo
 ''';
 
 String colorEcho = '''
@@ -39,22 +25,13 @@ colorEcho(){
 String installUbuntu = '''
 install_ubuntu(){
   cd ~
-  colorEcho - 安装Ubuntu Linux
+  colorEcho - 安装Linux
   cd ~/proot-distro-master
   bash ./install.sh
   apt-get install -y proot >/dev/null
-  old=`cat $ubuntuPath/etc/issue 2>/dev/null`
-  #echo \$old
-  strB="22.04"
-  result=\$(echo \$old | grep "\${strB}")
-  if [ "\$result" != "" ]; then
-    echo "升级ubuntu中"
-    mv -f $ubuntuPath/home ./
-    rm -rf $ubuntuPath
-  fi
-  proot-distro install ubuntu >/dev/null 2>&1
+  proot-distro install archlinux >/dev/null 2>&1
   mv -f ./home $ubuntuPath/ >/dev/null 2>&1
-  echo '$source' > $ubuntuPath/etc/apt/sources.list
+  echo '$source' > $ubuntuPath/etc/pacman.d/mirrorlist
   echo 'export PATH=/opt/code-server-$version-linux-arm64/bin:\$PATH' >> $ubuntuPath/root/.bashrc
   echo 'export ANDROID_DATA=/home/' >> $ubuntuPath/root/.bashrc
 }
@@ -87,7 +64,7 @@ start_vs_code(){
   install_ubuntu
   #install_vs_code
   mkdir -p $ubuntuPath/root/.config/code-server 2>/dev/null
-  echo '$source' > $ubuntuPath/etc/apt/sources.list
+  echo '$source' > $ubuntuPath/etc/pacman.d/mirrorlist
   echo '
   bind-addr: 0.0.0.0:${Config.port}
   auth: none
@@ -101,7 +78,7 @@ start_vs_code(){
   chmod +x \$CODE_PATH/lib/node
   chmod +x \$CODE_PATH/lib/vscode/node_modules/@vscode/ripgrep/bin/rg
   echo -e "\\033[31m- 启动中..\\033[0m"
-  proot-distro  login --bind /sdcard:/sd --bind /storage/emulated/0:/storage/emulated/0/ ubuntu  -- /opt/code-server-$version-linux-arm64/bin/code-server
+  proot-distro login --bind /sdcard:/sd --bind /storage/emulated/0:/storage/emulated/0/ archlinux -- /opt/code-server-$version-linux-arm64/bin/code-server
 }
 ''';
 
