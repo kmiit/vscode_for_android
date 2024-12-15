@@ -24,6 +24,9 @@ jobs:
       - name: Download code-server
         run:  wget -O assets/code-server-${{ env.CSVERSION }}-linux-arm64.tar.gz https://github.com/coder/code-server/releases/download/v${{ env.CSVERSION }}/code-server-${{ env.CSVERSION }}-linux-arm64.tar.gz
 
+      - name: Download code-server
+        run:  bash scripts/download_rootfs.sh
+
       - name: Set Up Java
         uses: actions/setup-java@v3.12.0
         with:
